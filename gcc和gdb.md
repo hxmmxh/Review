@@ -68,10 +68,28 @@ gcc 在产生调试符号时，同样采用了分级的思路，开发人员可�
 
 
 -----------------------------------------------
-
+[参考资料](https://www.cnblogs.com/qigaohua/p/6077790.html)
+https://blog.csdn.net/haoel/article/details/2883
+https://blog.csdn.net/haoel/article/month/2003/07
 # GDB
+http://blog.sina.com.cn/s/blog_4fcd1ea30100xhio.html
 
-## 常用命名
+### GDB的功能
+* 启动你的程序，可以按照你的自定义的要求随心所欲的运行程序。
+* 可让被调试的程序在你所指定的调置的断点处停住。（断点可以是条件表达式）
+* 当程序被停住时，可以检查此时你的程序中所发生的事。
+* 动态的改变你程序的执行环境。
+
+### 编译期
+* 编译时，我们必须要把调试信息加到可执行文件中。使用编译器（cc/gcc/g++）的 -g 参数可以做到这一点
+* 如果没有-g，将看不见程序的函数名、变量名，所代替的全是运行时的内存地址。
+
+### 常用命名汇总
+
+* 直接回车表示重复上一次命令
+* 输入命令时，可以不用打全命令，只用打命令的前几个字符就可以了，当然，命令的前几个字符应该要标志着一个唯一的命令
+* 可以敲击两次TAB键来补齐命令的全称，如果有重复的，那么gdb会把其例出来。
+
 |命令|命令缩写|命令说明|
 |:---:|:-----:|:-----:|
 list|l|显示多行源代码|
@@ -93,19 +111,196 @@ frame|f|查看栈帧
 whatis 变量名||查看变量的类型
 quit|q|退出GDB环境
 
+### GDB打印数据显示格式
+* x (hexadecimal) 按十六进制格式显示变量。 
+* d (signed decimal) 按十进制格式显示变量。 
+* u (unsigned decimal) 按十进制格式显示无符号整型。 
+* o (octal) 按八进制格式显示变量。 
+* t (binary) 按二进制格式显示变量。 
+* a (address) 按十六进制格式显示地址，并显示距离前继符号的偏移量(offset)。常用于定位未知地址(变量)。 
+* c (character) 按字符格式显示变量。 
+* f (floating) 按浮点数格式显示变量。
+* s (string) 显示为字符串
+* i 显示为机器语言（仅在显示内存的x命令中可用）
+* 使用时用/跟在命令的后面，例如`p/c buf`,以字符格式打印buf的内容
 
-* list
-    * list命令显示多行源代码,从上次的位置开始显示,默认情况下,一次显示10行,第一次使用时,从代码其实位置显示
-    * list n显示已第n行为中心的10行代码
-    * list functionname显示以functionname的函数为中心的10行代码
-    * list - 显示刚才打印过的源代码之前的代码
-* break
-    * break location:在location位置设置断点,改位置可以为某一行,某函数名或者其它结构的地址,GDB会在执行该位置的代码之前停下来
-    * delete breakpoints 断点号 : 删除断点,断点号表示的是第几个断点
-    * clear n表示清除第n行的断点
-    * disable/enable n表示使得编号为n的断点暂时失效或有效
-    * info breakpoints 可使用info查看断点相关的信息
+### 启动和退出
+* 载入程序
+    * `gdb <program>` program也就是执行文件，一般在当前目录下。
+    * `gdb <program> core` 用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的文件。
+    * 调试服务程序     
+        * 在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用`gdb <program> PID`格式挂接正在运行的程序。
+        * 先用`gdb <program>`关联上源代码，并进行gdb，在gdb中用attach命令来挂接进程的PID。并用detach来取消挂接的进程。
+* 程序运行参数
+    * `set args` 可指定运行时参数。（如：set args 10 20 30 40 50）
+    * `show args` 命令可以查看设置好的运行参数。
+* 运行环境。    
+    * `path <dir>` 可设定程序的运行路径。    
+    * `show paths` 查看程序的运行路径。    
+    * `set environment varname [=value]` 设置环境变量。如：set env USER=hchen
+    * `show environment [varname]` 查看环境变量。
+* 工作目录。    
+    * `cd <dir>` 相当于shell的cd命令。
+    * `pwd` 显示当前的所在目录。
+* 程序的输入输出。    
+    * info terminal 显示你程序用到的终端的模式。    
+    * 使用重定向控制程序输出。如：run > outfile    
+    * tty命令可以指写输入输出的终端设备。如：tty /dev/ttyb
+* 退出
+    * quit或q
+
+### 运行UNIX的shell程序
+* `shell <command string>`    
+调用UNIX的shell来执行<command string>，环境变量SHELL中定义的UNIX的shell将会被用来执行<command string>，如果SHELL没有定义，那就使用UNIX的标准shell：/bin/sh。（在Windows中使用Command.com或cmd.exe）
+*  `make <make-args>` 
+可以在gdb中执行make命令来重新build自己的程序。这个命令等价于“shell make <make-args>”。 
+
+
+### list l 查看代码
+* list命令显示多行源代码,从上次的位置开始显示,默认情况下,一次显示10行,第一次使用时,从代码其实位置显示
+* list n显示已第n行为中心的10行代码
+* list functionname显示以functionname的函数为中心的10行代码
+* list - 显示刚才打印过的源代码之前的代码
+
+### break 断点设置
+
+* `break <function>` 在进入指定函数时停住。C++中可以使用class::function或function(type,type)格式来指定函数名。
+* `break <linenum>`  在指定行号停住。
+* `break +offset`和`break -offset`   在当前行号的前面或后面的offset行停住。offiset为自然数。
+* `break filename:linenum`  在源文件filename的linenum行处停住。
+* `break filename:function` 在源文件filename的function函数的入口处停住。
+* `break *address` 在程序运行的内存地址处停住。
+* `break` break命令没有参数时，表示在下一条指令处停住。
+* `break ... if <condition>` ...可以是上述的参数，condition表示条件，在条件成立时停住。
+
+* `info break(points) [n]` 可使用info查看断点相关的信息
+
+* `clear` 清除所有的已定义的停止点。
+* `clear <function>``clear <filename:function>`  清除所有设置在函数上的停止点。
+* `clear <linenum>``clear <filename:linenum>`   清除所有设置在指定行上的停止点。
+* `delete [breakpoints] [range...]`  删除指定的断点，breakpoints为断点号。如果不指定断点号，则表示删除所有的断点。range 表示断点号的范围（如：3-7）。其简写命令为d。
+* `disable [breakpoints] [range...]` disable所指定的停止点，breakpoints为停止点号。如果什么都不指定，表示disable所有的停止点。简写命令是dis.
+* `enable [breakpoints] [range...]`   enable所指定的停止点，breakpoints为停止点号。
+* `enable [breakpoints] [range...]  once`     enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动disable。
+* `enable [breakpoints] [range...]  delete`      enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动删除。
 
 
 
-## 一般流程
+* `condition <bnum> <expression>`        修改断点号为bnum的停止条件为expression。
+* `condition <bnum>`        清除断点号为bnum的停止条件。
+* `ignore <bnum> <count>`        表示忽略断点号为bnum的停止条件count次。
+
+
+
+
+* 为停止点设定运行命令
+    * 我们可以使用GDB提供的command命令来设置停止点的运行命令。也就是说，当运行的程序在被停止住时，我们可以让其自动运行一些别的命令，这很有利行自动化调试。对基于GDB的自动化调试是一个强大的支持。
+    * 为断点号bnum指写一个命令列表。当程序被该断点停住时，gdb会依次运行命令列表中的命令。
+    ```
+      commands [bnum]    
+      ... command-list ...    
+      end
+    ```
+    * 例如：
+    ```
+        break foo if x>0        
+        commands        
+        printf "x is %d/n",x        
+        continue        
+        end 
+    ```       
+    * 断点设置在函数foo中，断点条件是x>0，如果程序被断住后，也就是，一旦x的值在foo函数中大于0，GDB会自动打印出x的值，并继续运行程序。
+* 如果你要清除断点上的命令序列，那么只要简单的执行一下commands命令，并直接在打个end就行了。
+
+
+### watchpoint 观察点设置
+* 观察点一般来观察某个表达式（变量也是一种表达式）的值是否有变化了，如果有变化，马上停住程序。
+* `watch <expr>`  为表达式（变量）expr设置一个观察点。一量表达式值有变化时，马上停住程序
+* `rwatch <expr>` 当表达式（变量）expr被读时，停住程序。
+  `awatch <expr>`  当表达式（变量）的值被读或被写时，停住程序。        
+* `info watchpoints`  列出当前所设置了的所有观察点。
+
+### CatchPoint 捕捉点设置
+* 设置捕捉点来补捉程序运行时的一些事件。如：载入共享库（动态链接库）或是C++的异常。
+* 设置捕捉点的格式为：`catch <event>`。当event发生时，停住程序。
+* event可以是下面的内容：
+    1、throw 一个C++抛出的异常。（throw为关键字） 
+    2、catch 一个C++捕捉到的异常。（catch为关键字） 
+    3、exec 调用系统调用exec时。（exec为关键字，目前此功能只在HP-UX下有用）  
+    4、fork 调用系统调用fork时。（fork为关键字，目前此功能只在HP-UX下有用）        
+    5、vfork 调用系统调用vfork时。（vfork为关键字，目前此功能只在HP-UX下有用）        
+    6、load 或 load <libname> 载入共享库（动态链接库）时。（load为关键字，目前此功能只在HP-UX下有用）        
+    7、unload 或 unload <libname> 卸载共享库（动态链接库）时。（unload为关键字，目前此功能只在HP-UX下有用）
+* tcatch <event>         只设置一次捕捉点，当程序停住以后，应点被自动删除。
+
+
+### 单步调试
+
+* `continue [ignore-count]`, `c [ignore-count]`,`fg [ignore-count]`  
+   恢复程序运行，直到程序结束，或是下一个断点到来。ignore-count表示忽略其后的断点次数。continue，c，fg三个命令都是一样的意思。
+* `step <count>`  单步跟踪，如果有函数调用，他会进入该函数。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+* `next <count>`  单步跟踪，如果有函数调用，他不会进入该函数。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+* `finish`        运行程序，直到当前函数完成返回。并打印函数返回时的堆栈地址和返回值及参数值等信息。
+* `until 或 u`        当你厌倦了在一个循环体内单步跟踪时，这个命令可以运行程序直到退出循环体。
+* `stepi 或 si`,`nexti 或 ni`        单步跟踪一条机器指令！一条程序代码有可能由数条机器指令完成，stepi和nexti可以单步执行机器指令。与之一样有相同功能的命令是“display/i $pc” ，当运行完这个命令后，单步跟踪会在打出程序代码的同时打出机器指令（也就是汇编代码）
+
+### print p 显示数据
+print / p
+查看变量的值
+//利用print 命令可以检查各个变量的值。
+(gdb) print p (p为变量名)
+print 是 gdb 的一个功能很强的命令，利用它可以显示被调试的语言中任何有效的表达式。表达式除了包含你程序中的变量外，还可以包含以下内容：
+//对程序中函数的调用
+(gdb) print find_entry(1, 0)
+
+//数据结构和其他复杂对象
+(gdb) print *table_start
+$8={e=reference=’\000’,location=0x0,next=0x0}
+
+//值的历史成分
+(gdb)print $1 ($1为历史记录变量,在以后可以直接引用 $1 的值)
+whatis 
+查看变量的类型
+//whatis 命令可以显示某个变量的类型
+(gdb) whatis p
+type = int *
+
+### 查看指定内存地址内容
+`x/  <n/f/u>  <addr>`    
+* 其中，n、f、u是可选的参数。addr表示待查看的内存地址。
+* n: 是一个正整数，表示显示内存的长度，也就是说从当前地址向后显示几个地址（units）的内容。
+* f: 表示显示的格式（format），默认初始使用十六进制格式。
+* u: 表示（the unit size）从当前地址往后请求的位宽大小。如果不指定的话，GDB默认是4个bytes。u参数可以用下面的字符来代替，b表示单字节，h表示双字节，w表示四字节，g表示八字节。当我们指定了位宽长度后，GDB会从指内存定的内存地址开始，读写指定位宽大小，并把其当作一个值取出来。
+
+
+### backtrace bt 查看函数堆栈
+
+* `backtrace` `bt` 打印当前的函数调用栈的所有信息。
+* `backtrace <n>` `bt <n>` n是一个正整数，表示只打印栈顶上n层的栈信息。
+* `backtrace <-n>` `bt <-n>` -n表一个负整数，表示只打印栈底下n层的栈信息。
+
+
+
+
+
+### 信号处理
+* GDB有能力在你调试程序的时候处理任何一种信号，你可以告诉GDB需要处理哪一种信号。你可以要求GDB收到你所指定的信号时，马上停住正在运行的程序，以供你进行调试。
+* `handle <signal> <keywords...>`  在GDB中定义一个信号处理。
+* 信号<signal>可以以SIG开头或不以SIG开头，可以用定义一个要处理信号的范围（如：SIGIO-SIGKILL，表示处理从SIGIO信号到SIGKILL的信号，其中包括SIGIO，SIGIOT，SIGKILL三个信号），也可以使用关键字all来标明要处理所有的信号。
+* 一旦被调试的程序接收到信号，运行程序马上会被GDB停住，以供调试。
+* 其<keywords>可以是以下几种关键字的一个或多个。
+    * nostop  当被调试的程序收到信号时，GDB不会停住程序的运行，但会打出消息告诉你收到这种信号。
+    * stop  当被调试的程序收到信号时，GDB会停住你的程序。       
+    * print 当被调试的程序收到信号时，GDB会显示出一条信息。 
+    * noprint 当被调试的程序收到信号时，GDB不会告诉你收到信号的信息。
+    * pass, noignore 当被调试的程序收到信号时，GDB不处理信号。这表示，GDB会把这个信号交给被调试程序会处理。
+    * nopass, ignore  当被调试的程序收到信号时，GDB不会让被调试程序来处理这个信号。
+    * info signals, info handle    查看有哪些信号在被GDB检测中。
+
+
+### 多线程处理
+* 如果你程序是多线程的话，你可以定义你的断点是否在所有的线程上，或是在某个特定的线程。GDB很容易帮你完成这一工作。
+* `break <linespec> thread <threadno>`    `break <linespec> thread <threadno> if ...`
+* linespec指定了断点设置在的源程序的行号。threadno指定了线程的ID，注意，这个ID是GDB分配的，你可以通过“info threads”命令来查看正在运行程序中的线程信息。
+* 如果你不指定thread <threadno>则表示你的断点设在所有线程上面。你还可以为某线程指定断点条件。
+* 当你的程序被GDB停住时，所有的运行线程都会被停住。这方便你你查看运行程序的总体情况。而在你恢复程序运行时，所有的线程也会被恢复运行。那怕是主进程在被单步调试时。
