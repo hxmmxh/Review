@@ -59,3 +59,22 @@
 * 在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
 * 建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
 * 从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+
+
+### git merge和git rebase
+[参考资料](https://blog.csdn.net/wh_19910525/article/details/7554489)
+[参考资料](https://www.cnblogs.com/shuimuzhushui/p/9000253.html)
+
+git merge：将两个分支，合并提交为一个新提交，并且新提交有2个parent。
+git rebase：会取消分支中的每个提交，并把他们临时存放，然后把当前分支更新到最新的origin分支，最后再吧所有提交应用到分支上。
+
+rebase会把你当前分支的 commit 放到公共分支的最后面,所以叫变基。就好像你从公共分支又重新拉出来这个分支一样。
+merge 会把公共分支和你当前的commit 合并在一起，形成一个新的 commit 提交
+
+不要在公共分支使用rebase
+
+### git fetch和git pull
+[参考资料](https://www.cnblogs.com/runnerjack/p/9342362.html)
+* git fetch是将远程主机的最新内容拉到本地，用户在检查了以后决定是否合并到工作本机分支中。
+* git pull 则是将远程主机的最新内容拉下来后直接合并，即：git pull = git fetch + git merge，这样可能会产生冲突，需要手动解决。
