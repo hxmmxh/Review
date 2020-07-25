@@ -1,13 +1,40 @@
 # IO操作
 
-* [不带缓冲的IO](#不带缓冲的IO)
-  1. 文件描述符
-  2. 文件的创建，打开和关闭
-  3. 文件读，写和缓冲
-* [内核中文件的表示方法](#内核中文件的表示方法)
-* [文件属性操作函数](#文件属性操作函数)
-* [带缓冲的IO](#带缓冲的IO)
-* [高级IO](#高级IO)
+- [IO操作](#io操作)
+  - [不带缓冲的IO](#不带缓冲的io)
+    - [文件描述符](#文件描述符)
+    - [文件的创建，打开和关闭](#文件的创建打开和关闭)
+      - [open函数](#open函数)
+      - [create函数](#create函数)
+      - [close函数](#close函数)
+    - [文件读写](#文件读写)
+      - [lseek函数](#lseek函数)
+      - [read函数](#read函数)
+      - [write函数](#write函数)
+      - [读写的原子操作](#读写的原子操作)
+      - [缓冲区相关操作函数](#缓冲区相关操作函数)
+  - [内核中文件的表示方法](#内核中文件的表示方法)
+  - [文件属性操作函数](#文件属性操作函数)
+    - [dup和dup2](#dup和dup2)
+    - [fcntl函数](#fcntl函数)
+    - [ioctl函数](#ioctl函数)
+  - [带缓冲的IO](#带缓冲的io)
+    - [流和FILE对象](#流和file对象)
+    - [缓冲](#缓冲)
+    - [打开流](#打开流)
+    - [关闭流](#关闭流)
+    - [读写流](#读写流)
+      - [非格式化IO](#非格式化io)
+        - [单字符操作](#单字符操作)
+        - [单行操作](#单行操作)
+        - [二进制IO](#二进制io)
+      - [流的错检验](#流的错检验)
+      - [流的定位](#流的定位)
+      - [格式化IO](#格式化io)
+        - [格式化输出](#格式化输出)
+        - [格式化输入](#格式化输入)
+    - [临时文件](#临时文件)
+    - [内存流](#内存流)
 
 ## 不带缓冲的IO
 
@@ -306,18 +333,22 @@ FILE *fopen(const char* pathname, const char *type);
 FILE *freopen(const char *pathname, const char * type, FILE * fp);
 FILE *fdopen(int fd, const char *type);
 //成功返回文件指针，出错返回NULL
+int fileno(FILE *fp);
+//返回与流相关的文件描述符
 ```
 
 * fopen打开路径名为pathname的文件
 * freopen在一个指定的流上打开一个指定的文件。如果该流已经打开，则先关闭流。如果该流已经定向，则会清除该定向。此函数一般用于将一个指定的文件打开一个预定义的流，例如标准输入输出等
 * fdopen将一个标准的IO流与指定文件描述符相结合。常用于由创建管道和网络通信通道函数返回的描述符。因为这些特殊类型的文件不能用fopen打开，必须先获得一个文件描述符后操作。
 * type参数指定对流的读写方式，共有15种取值
-  * r或rb
-  * w或wb
-  * a或ab
-  * r+或r+b或rb+
-  * w+或w+b或wb+
-  * a+或a+b或ab+
+  |type|说明|等价的open标志
+  |:---:|:---:|:---:|
+  r或rb|为读而打开|O_RDONLY
+  w或wb|为写而创建，截断至0长|O_WRONLY\|O_CREAT\|O_TRUNC
+  a或ab|为写而创建，在文件尾开始写|O_WRONLY\|O_CREAT\|O_APPEND
+  r+或r+b或rb+|为读和写而打开|O_RDWR
+  w+或w+b或wb+|为读和写而打开，截断至0长|O_RDWR\|O_CREAT\|O_TRUNC
+  a+或a+b或ab+|为在文件尾写读和写而打开或创建|O_RDWR\|O_CREAT\|O_APPEND
 
 ### 关闭流
 
@@ -482,6 +513,16 @@ int sprintf(char * buf, const char *format, ...);
 //成功返回存入数组的字符数，编码出错则返回负值
 int snprintf(char *buf, size_t n, const char * format, ...);
 //若缓冲区足够大，则返回将要存入数组的字符数，编码出错则返回负值
+
+//将可变参数列表替换成va_list格式，得到类似的5个函数
+
+int vprintf(const char * format, va_list arg);
+int vfprintf(FILE *fp, const char *format, va_list arg);
+int vdprintf(int fd, const char *format, va_list arg);
+//成功返回输出字符数，出错则返回负值
+int vsprintf(char * buf, const char *format, va_list arg);
+//成功返回存入数组的字符数，编码出错则返回负值
+int vsnprintf(char *buf, size_t n, const char * format, va_list arg);
 ```
 
 * printf将格式化数据写到标准输出，fprintf写到指定的流，dprintf写到指定的文件描述符
@@ -490,13 +531,129 @@ int snprintf(char *buf, size_t n, const char * format, ...);
 * format格式。转化说明以百分号开始，其他字符按原样输出。
 * 转换说明格式 `%[flags][fldwidth][precision][lenmodifier]convtype`
   * flags主要有
-  * fldwidth说明最小字段宽度。转换后参数字符若小于宽度，则多余字符位置用空格填充。表示方法是 一个非负十进制数或是一个星号(*)
-  * precision说明整型转换后最少输出数字位数、浮点数转换后小数点后的最小位数、字符串转换后最大字节数。表示方法是 一个点(.)，其后跟随一个可选的非负十进制数或一个星号(*)。
+
+  |flags|说明|
+  |:---:|:--:|
+  |'|将整数按千位分组字符|
+  |-|左对齐,默认输出格式是右对齐|
+  |+|总是显示带符号转换的正负号|
+  |空格|如果第一个字符不是正负号，则在其前面加上一个空格|
+  |#|指定另一种转换形式|
+  |0|添加前导0进行填充|
+
+  * fldwidth说明最小字段宽度。转换后参数字符若小于宽度，则多余字符位置用空格填充。若参数字符长于宽度，则无意义。表示方法是 一个非负十进制数或是一个星号(*)
+  * precision说明整型转换后最少输出数字位数(如果整数不够长，会加前导0，整数过长无影响)、浮点数转换后小数点后的最小位数(如果小数部分不够长，会在后面加0,小数部分太长则发生截断)、字符串转换后最大字节数(字符过长会截断)。表示方法是 一个点(.)，其后跟随一个可选的非负十进制数或一个星号(*)。
+  > fldwidth和precision字段均为\*时，用一个整型参数指定宽度或精度的值，该整型参数位于被转换的参数之前,例如 printf %\*.\*f 4 1 1.213123
   * lenmodifier说明参数长度，可能的值包含有
+
+  |长度修饰符|说明|
+  |:---:|:--:|
+  hh|signed或unsigned char
+  h|signed或unsigned short
+  l|signed或unsigned long或宽字符
+  ll|signed或unsigned long long
+  j|intmax_t或uintmax_t,最大的整数和最大的无符号整数的格式
+  z|size_t
+  t|ptrdiff_t
+  L|long double
+
   * convtype必须存在，控制着如何解释参数，可能的值包含有
 
-##### 格式化输出
+  |转换类型|说明|
+  |:---:|:--:|
+  d,i|有符号十进制
+  u|无符号十进制
+  o|无符号八进制
+  x,X|无符号十六进制
+  f,F|双精度浮点数，默认的小数点后精度是6位
+  e,E|指数格式的双精度浮点数
+  g,G|根据值自动选择f或e
+  a,A|十六进制指数格式的双精度浮点数
+  c|字符，若lc则代表宽字符
+  s|字符串，ls代表宽字符串
+  p|指针
+  n|把此printf调用输出的字符的数目写到一个带符号整型的指针中
+  %|输出一个%
+  C|等效于lc
+  S|等效于ls
 
+##### 格式化输入
 
+```c
+#include <stdio.h>
+int scanf(const char* format,...);
+int fscanf(FILE *fp, const char * format,...);
+int sscanf(const char* buf, const char *format,...);
+//返回赋值的输入项数，如果输入出错或在任一转换前已到达文件尾端，返回EOF
+
+int vscanf(const char* format, va_list arg);
+int vfscanf(FILE *fp, const char * format, va_list arg);
+int vsscanf(const char* buf, const char *format, va_list arg);
+
+```
+
+* 用于分析输入字符串，并将字符串序列转换成指定类型的变量。
+* 在格式之后的各参数中包含了变量的地址，用转换结果对这些变量赋值
+* 格式说明控制如何转换参数。以%开始。除了转换说明和空白字符外，格式字符串中的其他字符必须与输入匹配
+* 转换说明格式 `%[*][fldwidth][m][lenmodifier]convtype`
+  * 星号(*)用于抑制转换，按照转换说明的其余部分对输入进行转换，但转换结果并不存放在参数中
+  * fldwidth说明最大宽度(最大字符数)
+  * m是赋值分配符，可用于%c,%s以及%[转换符，会在内存缓冲区中分配空间用以容纳转换字符串。分配成功的地址会复制给对应的参数。必须记得手动free
+  * lenmodifier说明要用转换结果赋值的参数大小，可选的取值和printf中一样 
+  * convtype说明转换格式
+
+  |转换类型|说明|
+  |:---:|:--:|
+  d,i|有符号十进制
+  u|无符号十进制,输入负数时会转
+  o|无符号八进制
+  x,X|无符号十六进制
+  f,F|双精度浮点数，默认的小数点后精度是6位
+  e,E|指数格式的双精度浮点数
+  g,G|根据值自动选择f或e
+  a,A|十六进制指数格式的双精度浮点数
+  c|字符，若lc则代表宽字符
+  s|字符串，ls代表宽字符串
+  \[|匹配列出的字符序列，以\]终止
+  \[^|匹配除列出的字符序列外的所有字符，以\]终止
+  p|指针
+  n|把此printf调用输出的字符的数目写到一个带符号整型的指针中
+  %|输出一个%
+  C|等效于lc
+  S|等效于ls
 
 ### 临时文件
+
+```c
+#include <stdio.h>
+char* tmpnam(char *ptr);
+//返回指向唯一路径名的指针
+FILE* tmpfile(void);
+//成功返回文件指针，出错返回NULL
+```
+
+* tmpnam函数产生一个与现有文件名不同的一个有效路径名字符串。每次调用时产生的都是一个不同的路径名，最多调用TMP_MAX次
+  * 若ptr为空，则所产生的路径名存放在一个静态区中，指向该静态区的指针作为函数值返回。后续调用tmpname时会重写该静态区。因此如果多次调用函数，并且想保存该路径名的副本，需要复制该路径名，而不是保存指针的副本
+  * ptr不为空时，所产生的路径名存放在ptr中
+  * 得到路径名后需要手动创建文件，这期间不同进程和线程之间可能会存在竞争关系，最好使用tmpfile函数
+* tmpfile创建一个类型为wb+的临时二进制文件。在关闭该文件或程序结束时会被自动删除
+
+```c
+#include <stdlib.h>
+char *mkdtemp(char *template);
+//成功返回指向目录名的指针，出错返回NULL
+int mkstemp(char *template);
+//成功返回文件描述符，出错返回-1
+```
+
+* mkdtemp函数创建一个目录，该目录有一个唯一的名字，访问权限为S_IRUSR|S_IWUSR|S_IXUSR
+* mkstemp创建一个文件，同样有唯一的名字，访问权限为S_IRUSR|S_IWUSR，不会自动删除，需要手动解除链接
+* template字符串以XXXXXX(6个X)结尾，函数会将这个占位符替换成不同的字符来构建一个唯一的路径名。
+
+### 内存流
+
+## 高级IO
+
+### 非阻塞IO
+
+

@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "..\\..\\my_Log"
+		},
+		{
+			"path": "..\\..\\..\\share\\apue.3e"
 		}
 	],
 	"settings": {
