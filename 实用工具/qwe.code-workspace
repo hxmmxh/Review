@@ -4,13 +4,28 @@
 			"path": ".."
 		},
 		{
-			"path": "..\\..\\multi-threaded-webserver"
+			"path": "..\\..\\..\\share\\apue.3e"
+		},
+		{
+			"path": "..\\..\\..\\..\\Documents\\anhei2"
+		},
+		{
+			"path": "..\\..\\RedisStudy"
+		},
+		{
+			"path": "..\\..\\redis-3.0-annotated"
 		},
 		{
 			"path": "..\\..\\my_Log"
 		},
 		{
-			"path": "..\\..\\..\\share\\apue.3e"
+			"path": "..\\..\\multi-threaded-webserver"
+		},
+		{
+			"path": "..\\..\\note"
+		},
+		{
+			"path": "..\\..\\..\\..\\Documents\\WeChat Files\\wxid_c14kcy441x9052\\FileStorage\\File\\2020-11\\新建 WinRAR ZIP 压缩文件"
 		}
 	],
 	"settings": {
@@ -66,7 +81,13 @@
 			"cinttypes": "cpp",
 			"typeinfo": "cpp",
 			"list": "cpp",
-			"set": "cpp"
+			"set": "cpp",
+			"qapplication": "cpp",
+			"qdialog": "cpp",
+			"xtr1common": "c"
 		}
+	},
+	"extensions": {
+		"recommendations": []
 	}
 }

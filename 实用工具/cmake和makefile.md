@@ -1,29 +1,42 @@
 
-# 目录
-* [cmake](#cmake)
-* [makefile](#makefile)
+- [cmake](#cmake)
+  - [1. CMAKE简介](#1-cmake简介)
+  - [- 如果提示没有找到编译器，可以`apt install build-essential`解决，提供编译程序必须软件包的列表信息，编译程序有了这个软件包才知道 头文件在哪 才知道库函数在哪还会下载依赖的软件包 最后才组成一个开发环境](#ulli如果提示没有找到编译器可以apt-install-build-essential解决提供编译程序必须软件包的列表信息编译程序有了这个软件包才知道-头文件在哪-才知道库函数在哪还会下载依赖的软件包-最后才组成一个开发环境liul)
+  - [2. 安装CMAKE](#2-安装cmake)
+  - [3. CMAKE语法](#3-cmake语法)
+    - [3.1 命令](#31-命令)
+    - [3.2 变量和字符串](#32-变量和字符串)
+    - [3.3 程序流控制结构](#33-程序流控制结构)
+    - [CMAKE全局变量](#cmake全局变量)
+  - [* CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式](#ullicmake_allow_loose_loop_constructs-用来控制if-else语句的书写方式liul)
+    - [CMake常见命令](#cmake常见命令)
+  - [5. cmake使用案例](#5-cmake使用案例)
+    - [1. 单目录一个或多源文件的编译](#1-单目录一个或多源文件的编译)
+    - [2. 多目录编译](#2-多目录编译)
+    - [3. 自定义编译选项](#3-自定义编译选项)
+    - [4. 安装和测试功能](#4-安装和测试功能)
 
 
 # cmake
 
-https://www.hahack.com/codes/cmake/
+https://www.hahack.com/codes/cmake/  
 https://www.cnblogs.com/lsgxeva/p/9454443.html
 
 
-https://blog.codekissyoung.com/常用软件/cmake
-https://blog.csdn.net/luanpeng825485697/article/details/81202136
-https://www.cnblogs.com/coderfenghc/archive/2012/10/20/2712806.html
-https://blog.csdn.net/zhuiyunzhugang/article/details/88142908
+https://blog.codekissyoung.com/常用软件/cmake  
+https://blog.csdn.net/luanpeng825485697/article/details/81202136  
+https://www.cnblogs.com/coderfenghc/archive/2012/10/20/2712806.html  
+ 
 
 
 
-## CMAKE简介
+## 1. CMAKE简介
 * CMake是一个跨平台的、开源的构建工具。cmake是makefile的上层工具，它们的目的正是为了产生可移植的makefile，并简化自己动手写makefile时的巨大工作量。
 * CMake是一个跨平台的自动化建构系统,它使用一个名为 CMakeLists.txt 的文件来描述构建过程,可以产生标准的构建文件,如 Unix 的 Makefile 或Windows Visual C++ 的 projects/workspaces 。文件 CMakeLists.txt 需要手工编写,也可以通过编写脚本进行半自动的生成
 * 允许开发者编写一种平台无关的 CMakeList.txt 文件来定制整个编译流程，然后再根据目标用户的平台进一步生成所需的本地化 Makefile 和工程文件，如 Unix 的 Makefile 或 Windows 的 Visual Studio 工程。从而做到“Write once, run everywhere”
 * 在 linux 平台下使用 CMake 生成 Makefile 并编译的流程如下:
     * 编写 CMakeLists.txt。
-    * 执行命令“cmake PATH”或者“ccmake PATH”生成 Makefile ( PATH 是 CMakeLists.txt 所在的目录 )。在当前目录可以不加PATH
+    * 执行命令`cmake PATH`或者`ccmake PATH`生成 Makefile ( ccmake 和 cmake 的区别在于前者提供了一个交互式的界面,PATH 是 CMakeLists.txt 所在的目录 )。在当前目录可以不加PATH
     * 使用 make 命令进行编译。
 * 内部构建生成的Cmake的中间文件与源代码文件混杂在一起，并且cmake没有提供清理这些中间文件的命令。所以cmake推荐使用外部构建，步骤如下:
     * 在CMakeLists.txt的同级目录下，新建一个build文件夹
@@ -35,9 +48,9 @@ https://blog.csdn.net/zhuiyunzhugang/article/details/88142908
     cmake ..
     make 
     ```
-
+- 如果提示没有找到编译器，可以`apt install build-essential`解决，提供编译程序必须软件包的列表信息，编译程序有了这个软件包才知道 头文件在哪 才知道库函数在哪还会下载依赖的软件包 最后才组成一个开发环境
 ----------------------
-## 安装CMAKE
+## 2. 安装CMAKE
 * sudo apt-get install cmake
 * 或者cmake官网下载压缩包，解压缩后安装
 ```BASH
@@ -48,22 +61,24 @@ make
 make install
 ```
 ---------------------
-## CMAKE语法
-* CMakeLists.txt 的语法比较简单,由命令、注释和空格组成,
+## 3. CMAKE语法
+- CMakeLists.txt 的语法比较简单,由命令、注释和空格组成
+- 命令是不区分大小写的
+- 符号 # 后面的内容被认为是注释
 
-#### 命令
-* 命令是不区分大小写的,由命令名称、小括号和参数组成,参数之间使用空格进行间隔。
-* 符号"#"后面的内容被认为是注释
+### 3.1 命令
+- 命令是不区分大小写的,由命令名称、小括号和参数组成,参数之间使用空格进行间隔。
+- 符号"#"后面的内容被认为是注释
 
 ```cmake
 command(arg1 arg2 ...)          # 运行命令
 command(arg1 ${var_name})       # 使用变量
 ```
-* command可以是一个命令名；或者是一个宏；也可以是一个函数名。
-* args是以空格分隔的参数例表（如果参数中包含空格，则要加双引号）
-* 除了用于分隔参数的空白字符（空格、换行号、tabs）都是被忽略不计的。任何包含在双引号中的字符都做为一个参数。一个反斜杠用于转换码。
+- command可以是一个命令名；或者是一个宏；也可以是一个函数名。
+- args是以空格分隔的参数例表（如果参数中包含空格，则要加双引号）
+- 除了用于分隔参数的空白字符（空格、换行号、tabs）都是被忽略不计的。任何包含在双引号中的字符都做为一个参数。一个反斜杠用于转换码。
 
-#### 变量和字符串
+### 3.2 变量和字符串
 * 可以用一个set命令把一个字符串列表设置为一个变量，然后把这个变量传递给需要传递多参数的函数
 * 字符串列表可以由；或空格分隔组成
 * 用${VAR} 语法得到变量的引用。
@@ -79,7 +94,7 @@ command("${var}")
 等效于 command("a b c")
 
 ```
-#### 程序流控制结构
+### 3.3 程序流控制结构
 * 条件语句
 ```cmake
 IF(expression)
@@ -138,7 +153,7 @@ $匹配一行或一字符串结尾
 
 -------------------------
 
-## CMAKE全局变量
+### CMAKE全局变量
 * PROJECT_SOURCE_DIR 工程的根目录
 * PROJECT_BINARY_DIR 运行cmake命令的目录,通常是${PROJECT_SOURCE_DIR}/build
 * CMAKE_INCLUDE_PATH 环境变量,非cmake变量
@@ -157,7 +172,7 @@ $匹配一行或一字符串结尾
 * CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式
 -----------------------------------
 
-## CMake常见命令
+### CMake常见命令
 ```cmake
 # cmake最低版本需求，不加入此行会受到警告信息
 cmake_minimum_required (<version>) 
@@ -178,10 +193,10 @@ add_definitions()
 # 设置头文件位置,指定头文件的搜索路径
 include_directories(./include ${MY_INCLUDE})
 # 设置动态链接库或静态链接库的搜索路径，参数是目录
-link_directories（）
+link_directories（directory1 directory2 ...）
 # 添加需要链接的库文件路径，参数是文件路径
 LINK_LIBRARIES()
-# 查找库所在目录,在path中查找name1的路径存在VAR中
+# 查找库所在目录,在path中查找name1的路径，保存在VAR中，，如果所有目录中都没有，VARB就会被赋为NO_DEFAULT_PATH
 find_library (<VAR> name1 [path1 path2 ...])
 ```
 
@@ -196,35 +211,46 @@ set(CMAKE_CXX_FLAGS "-Wall std=c++11")
 set(SOURCE_FILES main.cpp test.cpp ...)
 ```
 ----------------------
-## cmake使用方法
-从简单到复杂介绍了几个常见的使用场景
-### 1.单目录一个或多源文件的编译
-cmake可以很轻松地解析出各文件的依赖关系
+## 5. cmake使用案例
+从简单到复杂介绍几个常见的使用场景
+### 1. 单目录一个或多源文件的编译
 
 ```cmake
-PROJECT(main)
+# CMake 最低版本号要求
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+# 项目信息
+PROJECT(main)
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+# 指定生成目标
 ADD_EXECUTABLE(main ${DIR_SRCS})
 ```
 
-### 2.多目录编译
-* 在项目的根目录下编写CMakeLists.txt，然后在每个子目录也编写一个
+### 2. 多目录编译
+- 在项目的根目录下编写CMakeLists.txt，然后在每个子目录也编写一个
+- 适当时把文件编译成静态库由main函数调用
 ```cmake
-PROJECT(main)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6) 
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(main) 
 ADD_SUBDIRECTORY( src )
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 ADD_EXECUTABLE(main ${DIR_SRCS}  )
+# 添加链接库
 TARGET_LINK_LIBRARIES( main Test )
 ```
 
 ```cmake
 AUX_SOURCE_DIRECTORY(. DIR_TEST1_SRCS)
-ADD_LIBRARY ( Test ${DIR_TEST1_SRCS})
+# 设置库文件的输出路径
+set(LIBRARY_OUTPUT_PATH [output_path])
+# 生成链接库
+ADD_LIBRARY (Test ${DIR_TEST1_SRCS})
 ```
 
-### 3.
+### 3. 自定义编译选项
+
+
+### 4. 安装和测试功能
+
 ---------------------
 **参考资料**
 [cmake](https://blog.csdn.net/gg_18826075157/article/details/72780431)  
