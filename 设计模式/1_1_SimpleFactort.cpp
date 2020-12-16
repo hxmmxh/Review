@@ -41,7 +41,6 @@ public:
 //3. 创建一个工厂，生成基于给定信息的实体类的对象
 class ShapeFactory
 {
-
 public:
     //使用 getShape 方法获取形状类型的对象
     Shape *getShape(string shapeType)
@@ -73,5 +72,4 @@ int main()
     p1->draw();
     p2->draw();
     p3->draw();
-
 }
