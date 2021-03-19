@@ -306,8 +306,8 @@ int fwide(FILE *fp, int mode);
 
 ```c
 #include <stdio.h>
-void setbuf(FILE *restrict fp, char * restrict buf);
-int setvbuf(FILE *restrict fp, char * restrict buf,int mode,size_t size);
+void setbuf(FILE* fp, char* buf);
+int setvbuf(FILE* fp, char* buf,int mode,size_t size);
 //成功返回0，出错返回非0
 ```
 

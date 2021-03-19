@@ -1,14 +1,13 @@
 
 - [cmake](#cmake)
   - [1. CMAKE简介](#1-cmake简介)
-  - [- 如果提示没有找到编译器，可以`apt install build-essential`解决，提供编译程序必须软件包的列表信息，编译程序有了这个软件包才知道 头文件在哪 才知道库函数在哪还会下载依赖的软件包 最后才组成一个开发环境](#ulli如果提示没有找到编译器可以apt-install-build-essential解决提供编译程序必须软件包的列表信息编译程序有了这个软件包才知道-头文件在哪-才知道库函数在哪还会下载依赖的软件包-最后才组成一个开发环境liul)
+  - [- 如果提示没有找到编译器，可以`apt install build-essential`解决，提供编译程序必须软件包的列表信息，编译程序有了这个软件包才知道 头文件在哪 才知道库函数在哪还会下载依赖的软件包 最后才组成一个开发环境](#--如果提示没有找到编译器可以apt-install-build-essential解决提供编译程序必须软件包的列表信息编译程序有了这个软件包才知道-头文件在哪-才知道库函数在哪还会下载依赖的软件包-最后才组成一个开发环境)
   - [2. 安装CMAKE](#2-安装cmake)
   - [3. CMAKE语法](#3-cmake语法)
     - [3.1 命令](#31-命令)
     - [3.2 变量和字符串](#32-变量和字符串)
     - [3.3 程序流控制结构](#33-程序流控制结构)
     - [CMAKE全局变量](#cmake全局变量)
-  - [* CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式](#ullicmake_allow_loose_loop_constructs-用来控制if-else语句的书写方式liul)
     - [CMake常见命令](#cmake常见命令)
   - [5. cmake使用案例](#5-cmake使用案例)
     - [1. 单目录一个或多源文件的编译](#1-单目录一个或多源文件的编译)
@@ -31,7 +30,7 @@ https://www.cnblogs.com/coderfenghc/archive/2012/10/20/2712806.html
 
 
 ## 1. CMAKE简介
-* CMake是一个跨平台的、开源的构建工具。cmake是makefile的上层工具，它们的目的正是为了产生可移植的makefile，并简化自己动手写makefile时的巨大工作量。
+- CMake是一个跨平台的、开源的构建工具。cmake是makefile的上层工具，它们的目的正是为了产生可移植的makefile，并简化自己动手写makefile时的巨大工作量。
 * CMake是一个跨平台的自动化建构系统,它使用一个名为 CMakeLists.txt 的文件来描述构建过程,可以产生标准的构建文件,如 Unix 的 Makefile 或Windows Visual C++ 的 projects/workspaces 。文件 CMakeLists.txt 需要手工编写,也可以通过编写脚本进行半自动的生成
 * 允许开发者编写一种平台无关的 CMakeList.txt 文件来定制整个编译流程，然后再根据目标用户的平台进一步生成所需的本地化 Makefile 和工程文件，如 Unix 的 Makefile 或 Windows 的 Visual Studio 工程。从而做到“Write once, run everywhere”
 * 在 linux 平台下使用 CMake 生成 Makefile 并编译的流程如下:
@@ -170,6 +169,7 @@ $匹配一行或一字符串结尾
 * LIBRARY_OUTPUT_PATH 重新定义目标链接库文件的存放位置
 * PROJECT_NAME 返回通过PROJECT指令定义的项目名称
 * CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS 用来控制IF ELSE语句的书写方式
+  
 -----------------------------------
 
 ### CMake常见命令
@@ -182,7 +182,7 @@ project (<name>)
 aux_source_directory(<dir> <variable>) 
 # 使用给定的源文件生成可执行文件
 add_executable(<name> ${SRC_LIST}) 
-# 指明可执行文件需要连接的链接库，当多个库存在依赖时,依赖库要写在后面
+# 指明可执行文件需要连接的链接库，当多个库存在依赖时,依赖库要写在后面,B文件依赖A文件中的内容，那么B文件应该放在A文件的左边
 target_link_libraries(<name> lib1 lib2 lib3) 
 # 添加一个名为<name>的库文件,指定STATIC, SHARED, MODULE参数来指定要创建的库的类型, STATIC对应的静态库(.a)，SHARED对应共享动态库(.so)
 add_library(<name> [STATIC | SHARED | MODULE] [EXCLUDE_FROM_ALL] source1 source2 ... sourceN)
