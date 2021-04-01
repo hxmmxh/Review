@@ -1,73 +1,73 @@
 #include <iostream>
 #include <string>
 using namespace std;
-//1. 为形状创建一个接口
-class Shape
+//1. 为电视创建一个接口
+class TV
 {
 public:
-    virtual void draw() = 0;
+    virtual void watch() = 0;
 };
 
 //2. 创建实现接口的实体类
-class Rectangle : public Shape
+class HaierTV : public TV
 {
 public:
-    void draw() override
+    void watch() override
     {
-        cout << "Rectangle\n";
+        cout << "Haier TV\n";
     }
 };
 
-class Square : public Shape
+class XiaomiTV : public TV
 {
 public:
-    void draw() override
+    void watch() override
     {
-        cout << "Square\n";
+        cout << "Xiaomi TV\n";
     }
 };
 
-class Circle : public Shape
+class HuaweiTV : public TV
 {
 public:
-    void draw() override
+    void watch() override
     {
-        cout << "Circle\n";
+        cout << "Huawei TV\n";
     }
 };
 
-//3.为颜色创建一个接口
-class Color
+//3.为手机创建一个接口
+class Phone
 {
 public:
-    virtual void fill() = 0;
+    virtual void call() = 0;
 };
 
 //4. 创建实现接口的实体类
-class Red : public Color
+class HaierPhone : public Phone
 {
 public:
-    void fill() override
+    void call() override
     {
-        cout << "RED\n";
+        cout << "Haier Phone\n";
     }
 };
 
-class Blue : public Color
+class XiaomiPhone : public Phone
 {
 public:
-    void fill() override
+    void call() override
     {
-        cout << "BLUE\n";
+        cout << "Xiaomi Phone\n";
     }
 };
 
-class Green : public Color
+class HuaweiPhone : public Phone
 {
 public:
-    void fill() override
+    void call() override
     {
-        cout << "GREEN\n";
+        cout << "Huawei Phone\n";
     }
 };
 
@@ -75,53 +75,47 @@ public:
 class AbstractFactory
 {
 public:
-    virtual Color *getColor(string) = 0;
-    virtual Shape *getShape(string) = 0;
+    virtual TV *createTV() = 0;
+    virtual Phone *createPhone() = 0;
 };
 
 //6. 创建扩展了 AbstractFactory 的工厂类，基于给定的信息生成实体类的对象。
-class ShapeFactory : public AbstractFactory
+class HaierFactory : public AbstractFactory
 {
 public:
-    Shape *getShape(string shapeType) override
+    TV *createTV() override
     {
-
-        if (shapeType == "CIRCLE")
-        {
-            return new Circle();
-        }
-        else if (shapeType == "RECTANGLE")
-        {
-            return new Rectangle();
-        }
-        else if (shapeType == "SQUARE")
-        {
-            return new Square();
-        }
-        return nullptr;
+        return new HaierTV();
     }
-    Color *getColor(string) override
+    Phone *createPhone() override
     {
-        return nullptr;
+        return new HaierPhone();
     }
 };
 
-class ColorFactory : public AbstractFactory
+class XiaomiFactory : public AbstractFactory
 {
 public:
-    Shape *getShape(string shapeType) override
+    TV *createTV() override
     {
-        return nullptr;
+        return new XiaomiTV();
     }
-    Color *getColor(string colorType) override
+    Phone *createPhone() override
     {
-        if (colorType == "RED")
-            return new Red();
-        else if (colorType == "BLUE")
-            return new Blue();
-        else if (colorType == "GREEN")
-            return new Green();
-        return nullptr;
+        return new XiaomiPhone;
+    }
+};
+
+class HuaweiFactory : public AbstractFactory
+{
+public:
+    TV *createTV() override
+    {
+        return new HuaweiTV();
+    }
+    Phone *createPhone() override
+    {
+        return new HuaweiPhone;
     }
 };
 
@@ -131,28 +125,31 @@ class FactoryProducer
 public:
     static AbstractFactory *getFactory(string choice)
     {
-        if (choice == "SHAPE")
-            return new ShapeFactory();
-        else if (choice == "COLOR")
-            return new ColorFactory();
+        if (choice == "Haier")
+            return new HaierFactory();
+        else if (choice == "Xiaomi")
+            return new XiaomiFactory();
+        else if (choice == "Huawei")
+            return new HuaweiFactory();
     }
 };
 
 //8.使用 FactoryProducer 来获取 AbstractFactory，通过传递类型信息来获取实体类的对象。
 int main()
 {
-    AbstractFactory *shapefactory = FactoryProducer::getFactory("SHAPE");
-    Shape *p1 = shapefactory->getShape("CIRCLE");
-    Shape *p2 = shapefactory->getShape("RECTANGLE");
-    Shape *p3 = shapefactory->getShape("SQUARE");
-    p1->draw();
-    p2->draw();
-    p3->draw();
-    AbstractFactory *colorfactory = FactoryProducer::getFactory("COLOR");
-    Color *q1 = colorfactory->getColor("RED");
-    Color *q2 = colorfactory->getColor("BLUE");
-    Color *q3 = colorfactory->getColor("GREEN");
-    q1->fill();
-    q2->fill();
-    q3->fill();
+    AbstractFactory *haierFactory = FactoryProducer::getFactory("Haier");
+    TV *pa1 = haierFactory->createTV();
+    Phone *pb1 = haierFactory->createPhone();
+    AbstractFactory *XiaomiFactory = FactoryProducer::getFactory("Xiaomi");
+    TV *pa2 = XiaomiFactory ->createTV();
+    Phone *pb2 = XiaomiFactory ->createPhone();
+    AbstractFactory *HuaweiFactory = FactoryProducer::getFactory("Huawei");
+    TV *pa3 = HuaweiFactory ->createTV();
+    Phone *pb3 = HuaweiFactory ->createPhone();
+    pa1->watch();
+    pb1->call();
+    pa2->watch();
+    pb2->call();
+    pa3->watch();
+    pb3->call();
 }

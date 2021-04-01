@@ -28,9 +28,9 @@ class Singleton2
 public:
     static Singleton2 *getSingleton2()
     {
+        std::lock_guard<mutex> guard(_mutex);
         if (value2 == nullptr)
         {
-            std::lock_guard<mutex> guard(_mutex);
             value2 = new Singleton2();
         }
         return value2;

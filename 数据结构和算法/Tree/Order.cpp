@@ -3,6 +3,7 @@
 #include <vector>
 #include <queue>
 #include <stack>
+#include <algorithm>
 
 using namespace std;
 
@@ -77,7 +78,7 @@ vector<int> inorderTraversal2(TreeNode *root)
 /*********************后序遍历*******************************/
 // 后序遍历
 // 用栈实现
-vector<int> postorderTraversal1(TreeNode *root)
+vector<int> postorderTraversal(TreeNode *root)
 {
     vector<int> res;
     stack<TreeNode *> stk;
@@ -85,14 +86,15 @@ vector<int> postorderTraversal1(TreeNode *root)
     {
         while (root != nullptr)
         {
+            res.emplace_back(root->val);
             stk.emplace(root);
-            root = root->left;
+            root = root->right;
         }
         root = stk.top();
         stk.pop();
-        res.emplace_back(root->val);
-        root = root->right;
+        root = root->left;
     }
+    reverse(res.begin(), res.end());
     return res;
 }
 
